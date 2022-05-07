@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from src.apps.adopcion.api.serializers import PersonaSerializer
 from src.apps.mascota.models import Vacuna, Mascota
 from src.apps.mascota.api.serializers import VacunaSerializer, MascotaSerializer
 
@@ -96,4 +97,17 @@ class MascotaDetail(APIView):
         instance = self.get_object(pk)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MascotaPersonaDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Mascota.objects.get(pk=pk)
+        except Mascota.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        instance = self.get_object(pk)
+        serializer = PersonaSerializer(instance.persona)
+        return Response(serializer.data)
 # endregion

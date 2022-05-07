@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from src.apps.adopcion.api.serializers import PersonaSerializer
 from src.apps.mascota.api.serializers import VacunaSerializer, MascotaSerializer
 from src.apps.mascota.models import Vacuna, Mascota
 
@@ -113,6 +114,21 @@ def mascota_detail(request, pk):
     # region [GET] method
     instance = get_object(pk)
     serializer = MascotaSerializer(instance)
+    return Response(serializer.data)
+    # endregion
+
+
+@api_view(['GET'])
+def mascota_persona_detail(request, pk):
+    def get_object(pk):
+        try:
+            return Mascota.objects.get(pk=pk)
+        except Mascota.DoesNotExist:
+            raise Http404
+
+    # region [GET] method
+    instance = get_object(pk)
+    serializer = PersonaSerializer(instance.persona)
     return Response(serializer.data)
     # endregion
 # endregion

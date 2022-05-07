@@ -14,9 +14,9 @@ Este proyecto tiene como proposito poner a prueba las formas de crear un endpoin
 - Clonar el proyecto ya sea por ssh o https
     ```bash
     # Clone via ssh
-    git clone git@github.com:fernandoperezwh/djRefugioAnimalesServer.git
+    git clone git@github.com:fernandoperezwh/djRefugioAnimales.Test2.git
     # Clone via https
-    git clone https://github.com/fernandoperezwh/djRefugioAnimalesServer.git
+    git clone https://github.com/fernandoperezwh/djRefugioAnimales.Test2.git
     ```
 - Crear el entorno virtual utilizando python 3.8, e instalar las dependencias.
     ```bash

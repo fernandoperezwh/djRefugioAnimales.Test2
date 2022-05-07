@@ -1,4 +1,4 @@
-# djRefugioAnimalesServer
+# djRefugioAnimales.Test2
 
 Este proyecto tiene como proposito poner a prueba las formas de crear un endpoint:
   - api_view

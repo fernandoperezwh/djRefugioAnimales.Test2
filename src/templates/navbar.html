@@ -27,7 +27,6 @@
               Personas
           </a>
         </li>
-        {% comment %}
         <li class="nav-item">
           <a class="nav-link"
              href="{% url 'vacuna_list_api' %}"
@@ -39,12 +38,18 @@
               Vacunas
           </a>
         </li>
-        {% endcomment %}
-        {% comment %}
+
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'mascota_list_api' %}" tabindex="-1" aria-disabled="true">Mascotas API</a>
+          <a class="nav-link"
+             href="{% url 'mascota_list_api' %}"
+             tabindex="-1"
+             aria-disabled="true">
+              {% if not user.is_authenticated %}
+                  <i class="bi bi-lock-fill"></i>
+              {% endif %}
+              Mascotas
+          </a>
         </li>
-        {% endcomment %}
       </ul>
     </div>
     <div class="my-2 my-lg-0">

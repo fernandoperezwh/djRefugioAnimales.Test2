@@ -13,7 +13,7 @@ class VacunaSerializer(serializers.ModelSerializer):
 class MascotaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mascota
-        fields = '__all__'
+        exclude = ('foto',)
 
     def to_representation(self, instance):
         self.fields['persona'] = PersonaSerializer()

@@ -9,7 +9,7 @@
 
     <div class="bibl-table">
         <div class="bibl-table-header">
-            <a href="/mascota/mascota/{{ code }}new/">
+            <a href="{% url create_url %}">
                 <button type="button" class="btn btn-success"> Registrar Mascota</button>
             </a>
             {% if buscador %}
@@ -44,7 +44,8 @@
                         <td>{{ data.sexo }}</td>
                         <td>{{ data.fecha_rescate }}</td>
                         <td>{{ data.persona.nombre }} {{ data.persona.apellidos }}</td>
-                        <td> {{data.vacunas.all|join_vacunas}} </td>
+                        <td> {{data.vacunas|join_names}} </td>
+                        <td><a href="{% url owner_detail data.id %}" class="btn btn-outline-primary">Adoptante</a></td>
                         <td><a href="{% url edit_url data.id %}" class="btn btn-secondary">Editar</a></td>
                         <td><a href="{% url delete_url data.id %}" class="btn btn-danger">Borrar</a></td>
                     </tr>{% endfor %} 

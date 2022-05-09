@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block content %}
+    <h1>Detalles de dueño/dueña</h1>
+
+
+    <form>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label">Nombre</label>
+            <div class="col-sm-10">
+                <input disabled type="text" class="form-control" value="{{ object.nombre }} {{ object.apellidos }}">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label">Edad</label>
+            <div class="col-sm-10">
+                <input disabled type="text" class="form-control" value="{{ object.edad }}">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label">Telefono</label>
+            <div class="col-sm-10">
+                <input disabled type="text" class="form-control" value="{{ object.telefono }}">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label">Domicilio</label>
+            <div class="col-sm-10">
+                <input disabled type="text" class="form-control" value="{{ object.domicilio }}">
+            </div>
+        </div>
+        <a href="{% url 'mascota_list_api' %}" class="btn btn-outline-primary">Volver al listado</a>
+    </form>
+{% endblock  %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Home djRefugioAnimales.Test2{% endblock %}
+
+{% block content %}
+<div class="col-lg-8 mx-auto p-3 py-md-5">
+    <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
+        <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
+            <img width="40" height="32" src="https://cdn.worldvectorlogo.com/logos/django.svg" alt="Django logo vector">
+            <span class="fs-4">djRefugioAnimales.Test2</span>
+        </a>
+    </header>
+
+    <main>
+        {% comment %}<h1>Probando Django REST Framework con JSON Web Token Authentication</h1>
+        <p class="fs-5 col-md-8">
+            Este proyecto provee una API de Refugio de Animales cuya autentificación se realiza por el
+            <strong>JSON Web Token Authentication</strong> que menciona la
+            <a href="https://www.django-rest-framework.org/api-guide/authentication/#json-web-token-authentication">
+                documentación de Django REST Framework.
+            </a>
+        </p>
+
+        <p class="fs-5 col-md-8">Este proyecto soporta dos tipos de autentificación</p>
+        <ul class="icon-list">
+            <li>Session Authentication</li>
+            <li>JSON Web Token Authentication</li>
+        </ul>
+
+        <hr class="col-8 col-md-8 mb-8">
+
+        <div class="row g-5">
+            <div class="col-md-8">
+                <h2>JSON Web Token Authentication</h2>
+                <p>
+                    Puede utilizar la API de este proyecto consultando desde un proyecto que representa un cliente externo llamado:
+                    <strong><a href="https://github.com/fernandoperezwh/djRefugioAnimalesClient">djRefugioAnimalesClient</a></strong>.
+                </p>
+                <p>
+                    Para hacer las peticiones a la API va a requerir autentificarse mediante un JSON Web Token. El cual puede adquirir desde
+                    el <strong>cliente djRefugioAnimalesClient</strong> especificando el usuario y contraseña.
+                </p>
+                {% if not user.is_authenticated %}
+                    <strong>O puede iniciar sesión para generar su access_token y refresh_token para utilizarlo en lugar de exponer el usuario y contraseña.</strong>
+                {% else %}
+                    {% if not user_access_token %}
+                        <strong>O puede generar su access_token y refresh_token para utilizarlo en lugar de exponer el usuario y contraseña.</strong>
+                        <form method="POST">{% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary">Generar nuevo JSON Web Token</button>
+                        </form>
+                    {% else %}
+                        <h4>Access Token (ttl: 5 minutes): </h4><code>{{ user_access_token }}</code><br><br>
+                        <h4>Refresh Token (ttl: 1 day): </h4> <code>{{ user_refresh_token }}</code>
+                    {% endif %}
+                {% endif %}
+                <hr>
+                <small>
+                    Acuda al archivo README para obtener información más detallada de como configurar el projecto cliente
+                    <strong><a href="https://github.com/fernandoperezwh/djRefugioAnimalesClient/blob/master/README.md">djRefugioAnimalesClient</a></strong>.
+                </small>
+            </div>
+            <div class="col-md-4">
+                <h2>Session Authentication</h2>
+                {% if not user.is_authenticated %}
+                    <p>
+                        Las rutas del menu superior se encuentra protegidas y solo puede acceder al recurso si inicia sesión desde el
+                        <a href="{% url 'admin:index' %}">Admin de Django.</a>
+                    </p>
+
+                    <small>
+                        Cree un nuevo usuario ejecutando el comando: <code>python manage.py createsuperuser</code>. <br>
+                        O inicie sesión con uno ya existente.
+                    </small>
+                {% else %}
+                    Bienvenido/bienvenida {{ user.username }}, ahora podra navegar entre las rutas protegidas del menu superior.
+                {% endif %}
+            </div>
+        </div>{% endcomment %}
+    </main>
+
+
+    <footer class="pt-5 my-5 text-muted border-top"></footer>
+</div>
+
+{% endblock  %}
+

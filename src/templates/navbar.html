@@ -1,0 +1,58 @@
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #FACBB8!important;">
+  <div class="container-fluid">
+    <a
+        href="{% url 'home' %}"
+        class="navbar-brand" href="#">
+        djRefugioAnimales.Test2 {{ API_VERSION }}
+    </a>
+    <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link"
+             href="{% url 'persona_list_api' %}"
+             tabindex="-1" aria-disabled="true">
+              {% if not user.is_authenticated %}
+                  <i class="bi bi-lock-fill"></i>
+              {% endif %}
+              Personas
+          </a>
+        </li>
+        {% comment %}
+        <li class="nav-item">
+          <a class="nav-link"
+             href="{% url 'vacuna_list_api' %}"
+             tabindex="-1"
+             aria-disabled="true">
+              {% if not user.is_authenticated %}
+                  <i class="bi bi-lock-fill"></i>
+              {% endif %}
+              Vacunas
+          </a>
+        </li>
+        {% endcomment %}
+        {% comment %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'mascota_list_api' %}" tabindex="-1" aria-disabled="true">Mascotas API</a>
+        </li>
+        {% endcomment %}
+      </ul>
+    </div>
+    <div class="my-2 my-lg-0">
+        {% if not user.is_authenticated %}
+            <a href="{% url 'admin:index' %}">Iniciar sesión</a>
+        {% else %}
+            <p>Bienvenido/bienvenida {{ user.username }}</p>
+        {% endif %}
+    </div>
+  </div>
+</nav>

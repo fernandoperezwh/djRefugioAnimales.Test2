@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 from src.utils.constants.api_version import ApiVersion
 
@@ -48,8 +49,17 @@ else:
     raise ImportError(F"La versión del API {api_version} no es una configuración valida.")
 # endregion
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Se agregan las urls del api dependiendo de la versión en la que corre el proyecto
     *api_url_patterns,
+
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+    path('', include('src.apps.adopcion.urls')),
+    path('', include('src.apps.mascota.urls')),
 ]
+
+
+from django.conf.urls.static import static
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

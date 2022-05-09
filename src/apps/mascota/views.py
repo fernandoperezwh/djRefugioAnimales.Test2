@@ -256,7 +256,7 @@ def mascota_delete_api(request, _id):
         request=request,
         endpoint=endpoint,
         instance=instance,
-        tpl_name="mascota__vacuna_delete.html",
+        tpl_name="mascota__mascota_delete.html",
         redirect=reverse(RETURN_URL),
         custom_messages={
             'success': 'Se elimino el registro de: <strong>{}</strong>'.format(instance.get('nombre')),

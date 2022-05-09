@@ -147,3 +147,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 API_ENDPOINT = env.str('API_ENDPOINT', 'http://127.0.0.1:8000')
 
 API_VERSION = env.str('API_VERSION', 'v1')
+
+API_PUBLIC = env.bool('API_PUBLIC', True)
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
+}
+
+if not API_PUBLIC:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append('rest_framework.authentication.SessionAuthentication')
+    REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'].append('rest_framework.permissions.IsAuthenticated')

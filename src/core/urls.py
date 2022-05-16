@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
 
-from src.utils.constants.api_version import ApiVersion
+from src.utils.constants import ApiVersion
 
 
 # region Dependiendo a la configuración del proyecto es como importamos las vistas a utilizar

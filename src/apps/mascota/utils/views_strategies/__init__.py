@@ -2,11 +2,13 @@ from django.conf import settings
 
 from src.apps.mascota.utils.views_strategies.instances import (
     ListVacunaViaAPIInstanceStrategy, ListMascotaViaAPIInstanceStrategy, ListPersonaViaAPIInstanceStrategy,
-    DetailVacunaViaAPIInstanceStrategy, DetailMascotaViaAPIInstanceStrategy, DetailPersonaViaAPIInstanceStrategy)
+    DetailVacunaViaAPIInstanceStrategy, DetailMascotaViaAPIInstanceStrategy, DetailPersonaViaAPIInstanceStrategy,
+    DetailMascotaPersonaViaAPIInstanceStrategy)
 from src.apps.mascota.utils.views_strategies.requests import (
     ListVacunaViaAPIRequestsStrategy, ListMascotaViaAPIRequestsStrategy, ListPersonaViaAPIRequestsStrategy,
     CreateVacunaViaAPIRequestsStrategy, CreateMascotaViaAPIRequestsStrategy, CreatePersonaViaAPIRequestsStrategy,
     RetrieveVacunaViaAPIRequestsStrategy, RetrieveMascotaViaAPIRequestsStrategy, RetrievePersonaViaAPIRequestsStrategy,
+    RetrieveMascotaPersonaViaAPIRequestsStrategy,
     UpdateVacunaViaAPIRequestsStrategy, UpdateMascotaViaAPIRequestsStrategy, UpdatePersonaViaAPIRequestsStrategy,
     DeleteVacunaViaAPIRequestsStrategy, DeleteMascotaViaAPIRequestsStrategy, DeletePersonaViaAPIRequestsStrategy)
 from src.utils.constants import APIStrategy, APIResource
@@ -37,6 +39,14 @@ class RefugioStrategies:
             strategy = DetailMascotaViaAPIInstanceStrategy
         elif settings.API_STRATEGY == APIStrategy.REQUESTS:
             strategy = RetrieveMascotaViaAPIRequestsStrategy
+        return strategy
+
+    def retrieve_mascotas_personas(self):
+        strategy = None
+        if settings.API_STRATEGY == APIStrategy.INSTANCE:
+            strategy = DetailMascotaPersonaViaAPIInstanceStrategy
+        elif settings.API_STRATEGY == APIStrategy.REQUESTS:
+            strategy = RetrieveMascotaPersonaViaAPIRequestsStrategy
         return strategy
 
     def retrieve_personas(self):

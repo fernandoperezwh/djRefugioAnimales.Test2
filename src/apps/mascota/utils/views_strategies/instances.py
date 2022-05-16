@@ -1,3 +1,4 @@
+import types
 from abc import ABC, abstractmethod
 
 from django.conf import settings
@@ -5,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from src.utils.constants import ApiVersion
+
 
 # region Classes base
 class APIInstanceBase(ABC):
@@ -26,6 +28,12 @@ class APIInstanceBase(ABC):
         return dict()
 
     def _validate_api_class(self):
+        # Se valida si se utiliza función con decorador
+        if isinstance(self.api_class, types.FunctionType):
+            # TODO: validar que la funcion utilice el decorador @api_view porque ahorita se puede pasar cualquier
+            #  variable que sea una funcion
+            return
+        # Se valida que las subclases hereden de APIView
         if not issubclass(self.api_class, APIView):
             raise ValueError('La clase definida en "api_class" debe ser una subclase de "APIView"')
 
@@ -38,9 +46,16 @@ class CallAPIInstance(APIInstanceBase, ABC):
         request.content_type = 'application/json'
         self._validate_api_class()
 
+        # Cuando se trata de una funcion que implemente @api_view
+        if isinstance(self.api_class, types.FunctionType):
+            return self.api_class(request, *args, **kwargs)
+
+        # Cuando se trata de un GenericViewSet o ModelViewset
         viewset_actions = self._get_viewset_actions()
         if viewset_actions:
             return self.api_class.as_view(viewset_actions)(request, *args, **kwargs)
+
+        # Cuando se trata de un ApiView o GenericView
         return self.api_class.as_view()(request, *args, **kwargs)
 
     def exec(self, request, *args, **kwargs):
@@ -53,7 +68,11 @@ class CallAPIInstance(APIInstanceBase, ABC):
 class ListVacunaViaAPIInstanceStrategy(CallAPIInstance):
     @property
     def api_class(self):
-        if settings.API_VERSION == ApiVersion.V2:
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.mascota.api.views.api_view_decorator import vacuna_list
+            return vacuna_list
+
+        elif settings.API_VERSION == ApiVersion.V2:
             from src.apps.mascota.api.views.api_view_class import VacunaList
             return VacunaList
 
@@ -75,7 +94,11 @@ class ListVacunaViaAPIInstanceStrategy(CallAPIInstance):
 class ListMascotaViaAPIInstanceStrategy(CallAPIInstance):
     @property
     def api_class(self):
-        if settings.API_VERSION == ApiVersion.V2:
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.mascota.api.views.api_view_decorator import mascota_list
+            return mascota_list
+
+        elif settings.API_VERSION == ApiVersion.V2:
             from src.apps.mascota.api.views.api_view_class import MascotaList
             return MascotaList
 
@@ -97,6 +120,10 @@ class ListMascotaViaAPIInstanceStrategy(CallAPIInstance):
 class ListPersonaViaAPIInstanceStrategy(CallAPIInstance):
     @property
     def api_class(self):
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.adopcion.api.views.api_view_decorator import persona_list
+            return persona_list
+
         if settings.API_VERSION == ApiVersion.V2:
             from src.apps.adopcion.api.views.api_view_class import PersonaList
             return PersonaList
@@ -121,7 +148,11 @@ class ListPersonaViaAPIInstanceStrategy(CallAPIInstance):
 class DetailVacunaViaAPIInstanceStrategy(CallAPIInstance):
     @property
     def api_class(self):
-        if settings.API_VERSION == ApiVersion.V2:
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.mascota.api.views.api_view_decorator import vacuna_detail
+            return vacuna_detail
+
+        elif settings.API_VERSION == ApiVersion.V2:
             from src.apps.mascota.api.views.api_view_class import VacunaDetail
             return VacunaDetail
 
@@ -145,7 +176,11 @@ class DetailVacunaViaAPIInstanceStrategy(CallAPIInstance):
 class DetailMascotaViaAPIInstanceStrategy(CallAPIInstance):
     @property
     def api_class(self):
-        if settings.API_VERSION == ApiVersion.V2:
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.mascota.api.views.api_view_decorator import mascota_detail
+            return mascota_detail
+
+        elif settings.API_VERSION == ApiVersion.V2:
             from src.apps.mascota.api.views.api_view_class import MascotaDetail
             return MascotaDetail
 
@@ -166,10 +201,39 @@ class DetailMascotaViaAPIInstanceStrategy(CallAPIInstance):
             return MascotaViewSet
 
 
+class DetailMascotaPersonaViaAPIInstanceStrategy(CallAPIInstance):
+    @property
+    def api_class(self):
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.mascota.api.views.api_view_decorator import mascota_persona_detail
+            return mascota_persona_detail
+
+        elif settings.API_VERSION == ApiVersion.V2:
+            from src.apps.mascota.api.views.api_view_class import MascotaPersonaDetail
+            return MascotaPersonaDetail
+
+        elif settings.API_VERSION == ApiVersion.V3:
+            from src.apps.mascota.api.views.generic_view import MascotaPersonaDetail
+            return MascotaPersonaDetail
+
+        elif settings.API_VERSION == ApiVersion.V4:
+            from src.apps.mascota.api.views.view_set import MascotaViewSet
+            self.context = {
+                'viewset_actions': {
+                    'get': 'persona',
+                },
+            }
+            return MascotaViewSet
+
+
 class DetailPersonaViaAPIInstanceStrategy(CallAPIInstance):
     @property
     def api_class(self):
-        if settings.API_VERSION == ApiVersion.V2:
+        if settings.API_VERSION == ApiVersion.V1:
+            from src.apps.adopcion.api.views.api_view_decorator import persona_detail
+            return persona_detail
+
+        elif settings.API_VERSION == ApiVersion.V2:
             from src.apps.adopcion.api.views.api_view_class import PersonaDetail
             return PersonaDetail
 

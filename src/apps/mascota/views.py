@@ -272,20 +272,13 @@ def mascota_delete_api(request, _id):
 class MascotaPersonaView(TemplateView):
     template_name = 'mascota__detalle_persona.html'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        refugio_strategy = RefugioStrategies()
+        self.__strategy = refugio_strategy.retrieve(APIResource.MASCOTAS_PERSONAS)
+
     def get_context_data(self, **kwargs):
         context = super(MascotaPersonaView, self).get_context_data(**kwargs)
-        context['object'] = self.__get_info_persona()
+        context['object'] = self.__strategy.exec(request=self.request, pk=self.args[0])
         return context
-
-    def __get_info_persona(self):
-        data = None
-        api_request = RefugioRequests()
-        try:
-            response = api_request.get('/api/mascotas/{mascota_id}/persona/'.format(mascota_id=self.args[0]),
-                                       cookies=self.request.COOKIES)
-            if response.status_code == status.HTTP_200_OK:
-                data = response.json()
-        except (ConnectionError, ConnectTimeout) as err:
-            pass
-        return data
 # endregion

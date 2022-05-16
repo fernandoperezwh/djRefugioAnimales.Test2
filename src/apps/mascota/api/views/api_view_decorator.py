@@ -11,7 +11,7 @@ from src.apps.mascota.models import Vacuna, Mascota
 
 # region Vacuna views
 @api_view(['GET', 'POST'])
-def vacuna_list(request):
+def vacuna_list(request, *args, **kwargs):
     # region [POST] method
     if request.method == 'POST':
         serializer = VacunaSerializer(data=request.data)
@@ -31,7 +31,7 @@ def vacuna_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def vacuna_detail(request, pk):
+def vacuna_detail(request, pk, *args, **kwargs):
     def get_object(pk):
         try:
             return Vacuna.objects.get(pk=pk)
@@ -64,7 +64,7 @@ def vacuna_detail(request, pk):
 
 # region Mascota views
 @api_view(['GET', 'POST'])
-def mascota_list(request):
+def mascota_list(request, *args, **kwargs):
     # region [POST] method
     if request.method == 'POST':
         serializer = MascotaSerializer(data=request.data)
@@ -88,7 +88,7 @@ def mascota_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def mascota_detail(request, pk):
+def mascota_detail(request, pk, *args, **kwargs):
     def get_object(pk):
         try:
             return Mascota.objects.get(pk=pk)
@@ -119,7 +119,7 @@ def mascota_detail(request, pk):
 
 
 @api_view(['GET'])
-def mascota_persona_detail(request, pk):
+def mascota_persona_detail(request, pk, *args, **kwargs):
     def get_object(pk):
         try:
             return Mascota.objects.get(pk=pk)

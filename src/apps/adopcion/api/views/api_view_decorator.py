@@ -10,7 +10,7 @@ from src.apps.adopcion.models import Persona
 
 
 @api_view(['GET', 'POST'])
-def persona_list(request):
+def persona_list(request, *args, **kwargs):
     # region [POST] method
     if request.method == 'POST':
         serializer = PersonaSerializer(data=request.data)
@@ -23,16 +23,16 @@ def persona_list(request):
     queryset = Persona.objects.all()
     search_query = request.query_params.get('q')
     if search_query:
-        args = [Q(nombre__icontains=search_query) | Q(apellidos__icontains=search_query) |
+        filter_args = [Q(nombre__icontains=search_query) | Q(apellidos__icontains=search_query) |
                 Q(email__icontains=search_query)]
-        queryset = queryset.filter(*args)
+        queryset = queryset.filter(*filter_args)
     serializer = PersonaSerializer(queryset, many=True)
     return Response(serializer.data)
     # endregion
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def persona_detail(request, pk):
+def persona_detail(request, pk, *args, **kwargs):
     def get_object(pk):
         try:
             return Persona.objects.get(pk=pk)

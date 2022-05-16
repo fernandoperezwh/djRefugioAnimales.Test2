@@ -27,8 +27,9 @@ class APIResource:
     """
     VACUNAS = 'vacunas'
     MASCOTAS = 'mascotas'
+    MASCOTAS_PERSONAS = 'mascotas_personas'
     PERSONAS = 'personas'
 
     @staticmethod
     def as_list():
-        return [APIResource.MASCOTAS, APIResource.VACUNAS, APIResource.PERSONAS]
+        return [APIResource.MASCOTAS, APIResource.MASCOTAS_PERSONAS, APIResource.VACUNAS, APIResource.PERSONAS]

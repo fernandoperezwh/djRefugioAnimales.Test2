@@ -109,6 +109,10 @@ class RetrieveMascotaViaAPIRequestsStrategy(RetrieveViaAPIRequestsStrategy):
     endpoint = '/api/mascotas/{id}/'
 
 
+class RetrieveMascotaPersonaViaAPIRequestsStrategy(RetrieveViaAPIRequestsStrategy):
+    endpoint = '/api/mascotas/{id}/persona/'
+
+
 class RetrievePersonaViaAPIRequestsStrategy(RetrieveViaAPIRequestsStrategy):
     endpoint = '/api/personas/{id}/'
 # endregion

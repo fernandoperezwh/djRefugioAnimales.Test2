@@ -3,6 +3,7 @@ from abc import abstractmethod, ABC
 from requests import ConnectionError, ConnectTimeout
 from rest_framework import status
 
+from src.apps.mascota.utils.views_strategies.refugio_strategies_adapter import RefugioStrategiesAdapter
 from src.utils.classes.refugio_requests import RefugioRequests
 
 
@@ -20,69 +21,105 @@ class APIRequestsBase:
 
 
 class ListViaAPIRequestsStrategy(IAPIRequestsStrategy, APIRequestsBase, ABC):
-
-    def exec(self, request):
-        data = None
+    def exec(self, request) -> RefugioStrategiesAdapter:
+        kwargs_strategy_adapter = {}
         try:
             response = self.api_request.get(self.endpoint, cookies=request.COOKIES)
-            if response.status_code == status.HTTP_200_OK:
-                data = response.json()
+            kwargs_strategy_adapter = {
+                'status_code': response.status_code,
+                'data': response.json() if response.content else {},
+            }
+            # Se obtienes los errores desde el response si ocurre alguno
+            if response.status_code == status.HTTP_400_BAD_REQUEST:
+                kwargs_strategy_adapter['errors'] = response.json()
+
         except (ConnectionError, ConnectTimeout) as err:
             pass
-        return data
+
+        # Se retorna un objeto que sirve como adaptador entre la estrategia de instancia y requests
+        return RefugioStrategiesAdapter(**kwargs_strategy_adapter)
 
 
 class RetrieveViaAPIRequestsStrategy(IAPIRequestsStrategy, APIRequestsBase, ABC):
-    def exec(self, request, pk):
-        data = None
+    def exec(self, request, pk) -> RefugioStrategiesAdapter:
+        kwargs_strategy_adapter = {}
         try:
             response = self.api_request.get(self.endpoint.format(id=pk), cookies=request.COOKIES)
-            if response is not None and response.status_code == status.HTTP_200_OK:
-                data = response.json()
+            kwargs_strategy_adapter = {
+                'status_code': response.status_code,
+                'data': response.json() if response.content else {},
+            }
+            # Se obtienes los errores desde el response si ocurre alguno
+            if response.status_code == status.HTTP_400_BAD_REQUEST:
+                kwargs_strategy_adapter['errors'] = response.json()
+
         except (ConnectionError, ConnectTimeout) as err:
             pass
-        return data
+
+        # Se retorna un objeto que sirve como adaptador entre la estrategia de instancia y requests
+        return RefugioStrategiesAdapter(**kwargs_strategy_adapter)
 
 
 class UpdateViaAPIRequestsStrategy(IAPIRequestsStrategy, APIRequestsBase, ABC):
-    def exec(self, request, pk, data=None):
+    def exec(self, request, pk, data=None) -> RefugioStrategiesAdapter:
         data = data or dict()
-        response_data = None
+        kwargs_strategy_adapter = {}
         try:
             response = self.api_request.put(self.endpoint.format(id=pk), data=data, cookies=request.COOKIES)
-            if bool(response is not None and
-                    response.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)):
-                response_data = response.json()
+            kwargs_strategy_adapter = {
+                'status_code': response.status_code,
+                'data': response.json() if response.content else {},
+            }
+            # Se obtienes los errores desde el response si ocurre alguno
+            if response.status_code == status.HTTP_400_BAD_REQUEST:
+                kwargs_strategy_adapter['errors'] = response.json()
+
         except (ConnectionError, ConnectTimeout) as err:
             pass
-        return response_data
+
+        # Se retorna un objeto que sirve como adaptador entre la estrategia de instancia y requests
+        return RefugioStrategiesAdapter(**kwargs_strategy_adapter)
 
 
 class CreateViaAPIRequestsStrategy(IAPIRequestsStrategy, APIRequestsBase, ABC):
-    def exec(self, request, data=None):
+    def exec(self, request, data=None) -> RefugioStrategiesAdapter:
         data = data or dict()
-        response_data = None
+        kwargs_strategy_adapter = {}
         try:
             response = self.api_request.post(self.endpoint, data=data, cookies=request.COOKIES)
-            if bool(response is not None and
-                    response.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)):
-                response_data = response.json()
+            kwargs_strategy_adapter = {
+                'status_code': response.status_code,
+                'data': response.json() if response.content else {},
+            }
+            # Se obtienes los errores desde el response si ocurre alguno
+            if response.status_code == status.HTTP_400_BAD_REQUEST:
+                kwargs_strategy_adapter['errors'] = response.json()
+
         except (ConnectionError, ConnectTimeout) as err:
             pass
-        return response_data
+
+        # Se retorna un objeto que sirve como adaptador entre la estrategia de instancia y requests
+        return RefugioStrategiesAdapter(**kwargs_strategy_adapter)
 
 
 class DeleteViaAPIRequestsStrategy(IAPIRequestsStrategy, APIRequestsBase, ABC):
-    def exec(self, request, pk):
-        response_data = None
+    def exec(self, request, pk) -> RefugioStrategiesAdapter:
+        kwargs_strategy_adapter = {}
         try:
             response = self.api_request.delete(self.endpoint.format(id=pk), cookies=request.COOKIES)
-            if bool(response is not None and
-                    response.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)):
-                response_data = response.json()
+            kwargs_strategy_adapter = {
+                'status_code': response.status_code,
+                'data': response.json() if response.content else {},
+            }
+            # Se obtienes los errores desde el response si ocurre alguno
+            if response.status_code == status.HTTP_400_BAD_REQUEST:
+                kwargs_strategy_adapter['errors'] = response.json()
+
         except (ConnectionError, ConnectTimeout) as err:
             pass
-        return response_data
+
+        # Se retorna un objeto que sirve como adaptador entre la estrategia de instancia y requests
+        return RefugioStrategiesAdapter(**kwargs_strategy_adapter)
 # endregion
 
 

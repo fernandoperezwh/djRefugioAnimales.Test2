@@ -2,9 +2,11 @@ import types
 from abc import ABC, abstractmethod
 
 from django.conf import settings
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from src.apps.mascota.utils.views_strategies.refugio_strategies_adapter import RefugioStrategiesAdapter
 from src.utils.constants import ApiVersion
 
 
@@ -58,9 +60,16 @@ class CallAPIInstance(APIInstanceBase, ABC):
         # Cuando se trata de un ApiView o GenericView
         return self.api_class.as_view()(request, *args, **kwargs)
 
-    def exec(self, request, *args, **kwargs):
+    def exec(self, request, *args, **kwargs) -> RefugioStrategiesAdapter:
         response = self._exec(request, *args, **kwargs)
-        return response.data if (200 <= response.status_code < 300) else None
+
+        # Se obtienes los errores desde el response si ocurre alguno
+        kwargs_strategy_adapter = {'status_code': response.status_code, 'data': response.data}
+        if response.status_code == status.HTTP_400_BAD_REQUEST:
+            kwargs_strategy_adapter['errors'] = response.data.serializer.errors
+
+        # Se retorna un objeto que sirve como adaptador entre la estrategia de instancia y requests
+        return RefugioStrategiesAdapter(**kwargs_strategy_adapter)
 # endregion
 
 

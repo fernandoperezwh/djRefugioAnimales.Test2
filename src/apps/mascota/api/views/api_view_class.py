@@ -12,7 +12,7 @@ from src.apps.mascota.api.serializers import VacunaSerializer, MascotaSerializer
 
 # region Vacuna views
 class VacunaList(APIView):
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         queryset = Vacuna.objects.all()
         search_query = request.query_params.get('q')
         if search_query:
@@ -20,7 +20,7 @@ class VacunaList(APIView):
         serializer = VacunaSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = VacunaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -34,19 +34,19 @@ class VacunaDetail(APIView):
         except Vacuna.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk):
+    def get(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = VacunaSerializer(instance)
         return Response(serializer.data)
 
-    def put(self, request, pk):
+    def put(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = VacunaSerializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request, pk):
+    def delete(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -55,7 +55,7 @@ class VacunaDetail(APIView):
 
 # region Mascota views
 class MascotaList(APIView):
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         queryset = Mascota.objects.prefetch_related('persona').all()
         search_query = request.query_params.get('q')
         if search_query:
@@ -67,7 +67,7 @@ class MascotaList(APIView):
         serializer = MascotaSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = MascotaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -81,19 +81,19 @@ class MascotaDetail(APIView):
         except Mascota.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk):
+    def get(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = MascotaSerializer(instance)
         return Response(serializer.data)
 
-    def put(self, request, pk):
+    def put(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = MascotaSerializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request, pk):
+    def delete(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -106,7 +106,7 @@ class MascotaPersonaDetail(APIView):
         except Mascota.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk):
+    def get(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = PersonaSerializer(instance.persona)
         return Response(serializer.data)

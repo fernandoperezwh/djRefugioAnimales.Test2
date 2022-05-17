@@ -11,7 +11,7 @@ from src.apps.adopcion.api.serializers import PersonaSerializer
 
 # region Persona views
 class PersonaList(APIView):
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         queryset = Persona.objects.all()
         search_query = request.query_params.get('q')
         if search_query:
@@ -21,7 +21,7 @@ class PersonaList(APIView):
         serializer = PersonaSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = PersonaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -35,19 +35,19 @@ class PersonaDetail(APIView):
         except Persona.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk):
+    def get(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = PersonaSerializer(instance)
         return Response(serializer.data)
 
-    def put(self, request, pk):
+    def put(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         serializer = PersonaSerializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request, pk):
+    def delete(self, request, pk, *args, **kwargs):
         instance = self.get_object(pk)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

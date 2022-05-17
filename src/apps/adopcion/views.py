@@ -5,12 +5,11 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import ListView
-from requests import ConnectionError, ConnectTimeout
+from rest_framework import status
 
 from src.apps.adopcion.models import Persona
 from src.apps.adopcion.forms import PersonaForm
-from src.apps.mascota.utils.views_strategies import RefugioStrategies
-from src.utils.classes.refugio_requests import RefugioRequests
+from src.apps.mascota.utils.views_strategies.refugio_strategies import RefugioStrategies
 from src.utils.constants import APIResource
 from src.utils.fnc.generics import generic_api_delete
 
@@ -26,7 +25,8 @@ class PersonaApiListView(ListView):
         self.__strategy = refugio_strategy.list(APIResource.PERSONAS)
 
     def get_info_via_api(self):
-        return self.__strategy.exec(request=self.request)
+        response = self.__strategy.exec(request=self.request)
+        return response.data
 
     def get_queryset(self):
         return self.get_info_via_api()
@@ -63,9 +63,9 @@ def persona_form_api(request, _id=None):
         request_copy = copy.copy(request)
         request_copy.method = 'GET'
         response = retrieve_strategy.exec(request_copy, pk=_id)
-        if response is None:
+        if response.status_code == status.HTTP_404_NOT_FOUND:
             raise Http404
-        initial = response
+        initial = response.data
     # endregion
 
     form = PersonaForm(initial=initial) if initial else PersonaForm()
@@ -87,8 +87,19 @@ def persona_form_api(request, _id=None):
                 response = create_strategy.exec(request_copy, data=form.cleaned_data)
             # endregion
 
-            # Se verifica si la api pudo actualizar/crear los datos de la persona
-            if response is None:
+            # Se verifica algun error con el envio del formulario
+            if response.status_code == status.HTTP_400_BAD_REQUEST and response.errors:
+                for field in response.errors.keys():
+                    if field == 'non_field_errors':
+                        form.add_error('__all__', response.errors.get(field)[0])
+                        continue
+                    form.add_error(field, response.errors.get(field)[0])
+                return render(request, "adopcion__persona_form.html", {
+                    "form": form,
+                })
+
+            # Se verifica algun error 500 o algo raro
+            if response.status_code is None or response.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
                 messages.error(request, 'Un error ha ocurrido intentando aplicar la accion sobre la persona '
                                         '<strong>{first_name} {last_name}</strong>'
                                         ''.format(first_name=form.cleaned_data.get('nombre'),
@@ -119,7 +130,7 @@ def persona_delete_api(request, _id):
     request_copy = copy.copy(request)
     request_copy.method = 'GET'
     instance = retrieve_strategy.exec(request_copy, pk=_id)
-    if instance is None:
+    if instance.status_code == status.HTTP_404_NOT_FOUND:
         raise Http404
     # endregion
 
@@ -132,9 +143,9 @@ def persona_delete_api(request, _id):
         redirect=reverse(RETURN_URL),
         custom_messages={
             'success': 'Se elimino el registro de: <strong>{} {}</strong>'
-                       ''.format(instance.get('nombre'), instance.get('apellidos')),
+                       ''.format(instance.data.get('nombre'), instance.data.get('apellidos')),
             'error': 'Un error ha ocurrido intentando eliminar el registro de: <strong>{} {}</strong>'
-                     ''.format(instance.get('nombre'), instance.get('apellidos')),
+                     ''.format(instance.data.get('nombre'), instance.data.get('apellidos')),
         }
     )
 # endregion

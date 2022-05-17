@@ -5,13 +5,11 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import ListView, TemplateView
-from requests import ConnectTimeout
 from rest_framework import status
 
 from src.apps.mascota.forms import VacunaForm, MascotaForm
 from src.apps.mascota.models import Vacuna
-from src.apps.mascota.utils.views_strategies import RefugioStrategies
-from src.utils.classes.refugio_requests import RefugioRequests
+from src.apps.mascota.utils.views_strategies.refugio_strategies import RefugioStrategies
 from src.utils.constants import APIResource
 from src.utils.fnc.generics import generic_api_delete
 
@@ -27,7 +25,8 @@ class VacunaApiListView(ListView):
         self.__strategy = refugio_strategy.list(APIResource.VACUNAS)
 
     def get_info_via_api(self):
-        return self.__strategy.exec(request=self.request)
+        response = self.__strategy.exec(request=self.request)
+        return response.data
 
     def get_queryset(self):
         return self.get_info_via_api()
@@ -65,9 +64,9 @@ def vacuna_form_api(request, _id=None):
         request_copy = copy.copy(request)
         request_copy.method = 'GET'
         response = retrieve_strategy.exec(request_copy, pk=_id)
-        if response is None:
+        if response.status_code == status.HTTP_404_NOT_FOUND:
             raise Http404
-        initial = response
+        initial = response.data
     # endregion
 
     form = VacunaForm(initial=initial) if initial else VacunaForm()
@@ -89,12 +88,24 @@ def vacuna_form_api(request, _id=None):
                 response = create_strategy.exec(request_copy, data=form.cleaned_data)
             # endregion
 
-            # Se verifica si la api pudo actualizar/crear los datos de la vacuna
-            if response is None:
+            # Se verifica algun error con el envio del formulario
+            if response.status_code == status.HTTP_400_BAD_REQUEST and response.errors:
+                for field in response.errors.keys():
+                    if field == 'non_field_errors':
+                        form.add_error('__all__', response.errors.get(field)[0])
+                        continue
+                    form.add_error(field, response.errors.get(field)[0])
+                return render(request, "mascota__vacuna_form.html", {
+                    "form": form,
+                })
+
+            # Se verifica algun error 500 o algo raro
+            if response.status_code is None or response.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
                 messages.error(request, 'Un error ha ocurrido intentando aplicar la accion sobre la vacuna '
                                         '<strong>{name}</strong>'
                                         ''.format(name=form.cleaned_data.get('nombre')))
                 return HttpResponseRedirect(reverse(RETURN_URL))
+
             # Si no ocurrio ningun error durante el intento de crear o eliminar, se manda el mensaje de exito
             messages.success(request, 'Se ha realizado con exito la accion sobre la vacuna <strong>{name}</strong>'
                                       ''.format(name=form.cleaned_data.get('nombre')))
@@ -118,7 +129,7 @@ def vacuna_delete_api(request, _id):
     request_copy = copy.copy(request)
     request_copy.method = 'GET'
     instance = retrieve_strategy.exec(request_copy, pk=_id)
-    if instance is None:
+    if instance.status_code == status.HTTP_404_NOT_FOUND:
         raise Http404
     # endregion
 
@@ -130,9 +141,9 @@ def vacuna_delete_api(request, _id):
         tpl_name="mascota__vacuna_delete.html",
         redirect=reverse(RETURN_URL),
         custom_messages={
-            'success': 'Se elimino el registro de: <strong>{}</strong>'.format(instance.get('nombre')),
+            'success': 'Se elimino el registro de: <strong>{}</strong>'.format(instance.data.get('nombre')),
             'error': 'Un error ha ocurrido intentando eliminar el registro de: <strong>{}</strong>'
-                     ''.format(instance.get('nombre')),
+                     ''.format(instance.data.get('nombre')),
         }
     )
 # endregion
@@ -149,7 +160,8 @@ class MascotaApiListView(ListView):
         self.__strategy = refugio_strategy.list(APIResource.MASCOTAS)
 
     def get_info_via_api(self):
-        return self.__strategy.exec(request=self.request)
+        response = self.__strategy.exec(request=self.request)
+        return response.data
 
     def get_queryset(self):
         return self.get_info_via_api()
@@ -187,13 +199,13 @@ def mascota_form_api(request, _id=None):
         request_copy = copy.copy(request)
         request_copy.method = 'GET'
         response = retrieve_strategy.exec(request_copy, pk=_id)
-        if response is None:
+        if response.status_code == status.HTTP_404_NOT_FOUND:
             raise Http404
         initial = {
-            **response,
-            'persona': response.get('persona', {}).get('id'),
+            **response.data,
+            'persona': response.data.get('persona', {}).get('id'),
             'vacunas': map(lambda vacuna: vacuna.get('id'),
-                           response.get('vacunas', list())),
+                           response.data.get('vacunas', list())),
         }
     # endregion
 
@@ -205,7 +217,7 @@ def mascota_form_api(request, _id=None):
         if form.is_valid():
             cleaned_data = {
                 **form.cleaned_data,
-                'persona': form.cleaned_data.get('persona').id,
+                'persona': form.cleaned_data.get('persona').id if form.cleaned_data.get('persona') else None,
                 'vacunas': list(map(lambda vacuna: vacuna.id, form.cleaned_data.get('vacunas', []))),
             }
             # region Editar registro de una mascota
@@ -221,12 +233,24 @@ def mascota_form_api(request, _id=None):
                 response = create_strategy.exec(request_copy, data=cleaned_data)
             # endregion
 
-            # Se verifica si la api pudo actualizar/crear los datos de la mascota
-            if response is None:
+            # Se verifica algun error con el envio del formulario
+            if response.status_code == status.HTTP_400_BAD_REQUEST and response.errors:
+                for field in response.errors.keys():
+                    if field == 'non_field_errors':
+                        form.add_error('__all__', response.errors.get(field)[0])
+                        continue
+                    form.add_error(field, response.errors.get(field)[0])
+                return render(request, "mascota__mascota_form.html", {
+                    "form": form,
+                })
+
+            # Se verifica algun error 500 o algo raro
+            if response.status_code is None or response.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
                 messages.error(request, 'Un error ha ocurrido intentando aplicar la accion sobre la mascota '
                                         '<strong>{name}</strong>'
                                         ''.format(name=form.cleaned_data.get('nombre')))
                 return HttpResponseRedirect(reverse(RETURN_URL))
+
             # Si no ocurrio ningun error durante el intento de crear o eliminar, se manda el mensaje de exito
             messages.success(request, 'Se ha realizado con exito la accion sobre la mascota <strong>{name}</strong>'
                                       ''.format(name=form.cleaned_data.get('nombre')))
@@ -250,7 +274,7 @@ def mascota_delete_api(request, _id):
     request_copy = copy.copy(request)
     request_copy.method = 'GET'
     instance = retrieve_strategy.exec(request_copy, pk=_id)
-    if instance is None:
+    if instance.status_code == status.HTTP_404_NOT_FOUND:
         raise Http404
     # endregion
 
@@ -262,9 +286,9 @@ def mascota_delete_api(request, _id):
         tpl_name="mascota__mascota_delete.html",
         redirect=reverse(RETURN_URL),
         custom_messages={
-            'success': 'Se elimino el registro de: <strong>{}</strong>'.format(instance.get('nombre')),
+            'success': 'Se elimino el registro de: <strong>{}</strong>'.format(instance.data.get('nombre')),
             'error': 'Un error ha ocurrido intentando eliminar el registro de: <strong>{}</strong>'
-                     ''.format(instance.get('nombre')),
+                     ''.format(instance.data.get('nombre')),
         }
     )
 
@@ -279,6 +303,9 @@ class MascotaPersonaView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(MascotaPersonaView, self).get_context_data(**kwargs)
-        context['object'] = self.__strategy.exec(request=self.request, pk=self.args[0])
+        response = self.__strategy.exec(request=self.request, pk=self.args[0])
+        if response.status_code == status.HTTP_404_NOT_FOUND:
+            raise Http404
+        context['object'] = response.data
         return context
 # endregion
